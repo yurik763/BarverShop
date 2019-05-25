@@ -4,18 +4,25 @@ require 'sinatra'
 require 'sinatra/reloader'
 require 'sqlite3'
 
+ def get_db 
+  return SQLite3::Database.new 'barbershop.db'
+end
+
 configure do
-    @db = SQLite3::Database.new 'barbershop.db'
-    @db.execute 'CREATE TABLE IF NOT EXISTS 
+    db = get_db
+    db.execute 'CREATE TABLE IF NOT EXISTS 
       "Users" 
       (
             "id" INTEGER PRIMARY KEY AUTOINCREMENT, 
             "username" TEXT, 
             "phone" TEXT, 
-            "date-stamp" TEXT, 
+            "datestamp" TEXT, 
             "barber" TEXT, 
             "color" TEXT)'
-end
+  end
+
+   
+
 
 get '/' do
 	erb "Hello! <a href=\"https://github.com/bootstrap-ruby/sinatra-bootstrap\">Original</a> pattern has been modified for <a href=\"http://rubyschool.us/\">Ruby School</a>"			
@@ -32,26 +39,15 @@ end
 
 post '/visit' do
   # user_name, phone, date_time
-  @barber = params[:baber]
   @username = params[:username]
   @phone = params[:phone]
   @date_time = params[:date_time]
+  @barber = params[:barber]
   @color = params[:color]
 
   hh = {:username => 'Введите имя', 
         :phone => 'Введите номер телефона', 
         :date_time => 'Неправильная дата и время' }
-
-  #для каждой пыры ключ-значение
- # hh.each do |key,value|
- #     if params[key] == ''
-        # переменной error присвоить value из хеша hh
-        # (а value из хеша присовить сообщение об ошибке)
-#        @error = hh[key]
-        #вернуть предтавление visit
-#        return erb :visit
-#      end
-#  end
 
 @error = hh.select {|key,_| params[key] == ""}.values.join(", ")
 
@@ -60,13 +56,12 @@ post '/visit' do
   end
 
 
+ db = get_db
+ db.execute 'INSERT INTO Users (username, phone, datestamp, barber, color) 
+ VALUES (?, ?, ?, ?, ?)', [@username, @phone, @date_time, @barber, @color]
+
   @title = "Спасибо!"
   @message = "Уважаемый #{@username}, мы ждём вас #{@date_time}. Ваша парикмахер #{@barber}, цвет окраски #{@color}"
-
-  # запишем в файл то, что ввёл клиент
-  f = File.open './public/users.txt', 'a'
-  f.write "Имя: #{@username}, телефон: #{@phone}, дата и время: #{@date_time}. Парикмахер: #{@barber}, цвет окраски #{@color}\n"
-  f.close
 
   erb :message
 end

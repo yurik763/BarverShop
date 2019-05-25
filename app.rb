@@ -5,7 +5,9 @@ require 'sinatra/reloader'
 require 'sqlite3'
 
  def get_db 
-  return SQLite3::Database.new 'barbershop.db'
+  db = SQLite3::Database.new 'barbershop.db'
+  db.results_as_hash = true
+  return db
 end
 
 configure do
@@ -20,9 +22,6 @@ configure do
             "barber" TEXT, 
             "color" TEXT)'
   end
-
-   
-
 
 get '/' do
 	erb "Hello! <a href=\"https://github.com/bootstrap-ruby/sinatra-bootstrap\">Original</a> pattern has been modified for <a href=\"http://rubyschool.us/\">Ruby School</a>"			
@@ -41,13 +40,13 @@ post '/visit' do
   # user_name, phone, date_time
   @username = params[:username]
   @phone = params[:phone]
-  @date_time = params[:datetimepicker]
+  @date_time = params[:date_time]
   @barber = params[:barber]
   @color = params[:color]
 
   hh = {:username => 'Введите имя', 
         :phone => 'Введите номер телефона', 
-        :datetimepicker => 'Неправильная дата и время' }
+        :date_time => 'Неправильная дата и время' }
 
 @error = hh.select {|key,_| params[key] == ""}.values.join(", ")
 
@@ -68,6 +67,10 @@ end
 
 get '/contacts' do
   erb :contacts
+end
+
+get '/showusers' do
+  erb :showusers
 end
 
 post '/contacts' do

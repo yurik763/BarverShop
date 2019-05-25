@@ -41,13 +41,13 @@ post '/visit' do
   # user_name, phone, date_time
   @username = params[:username]
   @phone = params[:phone]
-  @date_time = params[:date_time]
+  @date_time = params[:datetimepicker]
   @barber = params[:barber]
   @color = params[:color]
 
   hh = {:username => 'Введите имя', 
         :phone => 'Введите номер телефона', 
-        :date_time => 'Неправильная дата и время' }
+        :datetimepicker => 'Неправильная дата и время' }
 
 @error = hh.select {|key,_| params[key] == ""}.values.join(", ")
 

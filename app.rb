@@ -5,9 +5,9 @@ require 'sinatra/reloader'
 require 'sqlite3'
 
  def get_db 
-  db = SQLite3::Database.new 'barbershop.db'
-  db.results_as_hash = true
-  return db
+  @db = SQLite3::Database.new 'barbershop.db'
+  @db.results_as_hash = true
+  return @db
 end
 
 configure do
@@ -70,7 +70,11 @@ get '/contacts' do
 end
 
 get '/showusers' do
-  erb :showusers
+  get_db
+  @results = @db.execute 'SELECT * FROM Users ORDER BY id DESC'
+  @db.close
+
+  erb :showusers  
 end
 
 post '/contacts' do

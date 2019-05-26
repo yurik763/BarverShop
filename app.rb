@@ -4,7 +4,19 @@ require 'sinatra'
 require 'sinatra/reloader'
 require 'sqlite3'
 
- def get_db 
+def is_barber_exists? db, param #существует ли парикмахер
+  db.execute('SELECT * FROM Barber_option WHERE option=?', [param]).length > 0
+end
+
+def seed_db base, barber_option
+  barber_option.each do |barber|
+    if !is_barber_exists? @db, barber #парикмахер не существует выполнить то что ниже
+      db.execute 'INSERT INTO Barber_option (option) VALUES (?)', [barber] #вставляет парикмаера в нашу базу данных
+    end
+  end
+end
+
+def get_db 
   @db = SQLite3::Database.new 'barbershop.db'
   @db.results_as_hash = true
   return @db
@@ -12,7 +24,7 @@ end
 
 configure do
     db = get_db
-    db.execute 'CREATE TABLE IF NOT EXISTS 
+    @db.execute 'CREATE TABLE IF NOT EXISTS 
       "Users" 
       (
             "id" INTEGER PRIMARY KEY AUTOINCREMENT, 
@@ -21,6 +33,15 @@ configure do
             "datestamp" TEXT, 
             "barber" TEXT, 
             "color" TEXT)'
+
+    @db.execute 'CREATE TABLE IF NOT EXISTS "Barber_option"
+    (
+      "id" INTEGER PRIMARY KEY AUTOINCREMENT,
+      "option" TEXT
+    )'
+
+      seed_db @db, ['Jassie Pinkman', 'Walter White', 'Gus Fring', 'Mike Ehrmantraut']
+  @db.close
   end
 
 get '/' do
@@ -73,7 +94,6 @@ get '/showusers' do
   get_db
   @results = @db.execute 'SELECT * FROM Users ORDER BY id DESC' #выводит таблицу и записывет результат в result
   
-
   erb :showusers  
 end
 
@@ -98,54 +118,4 @@ post '/contacts' do
   f.close
   erb :message
 
-end
-
-configure do
-  enable :sessions
-end
-
-helpers do
-  def login
-    session[:identity] ? session[:identity] : 'Вход в систему'
-  end
-end
-
-before '/secure/*' do
-  unless session[:identity]
-    session[:previous_url] = request.path
-    @error = 'Sorry, you need to be logged in to visit ' + request.path
-    halt erb :login
-  end
-end
-
-get '/' do
-  erb 'Can you handle a <a href="/secure/place">пароль</a>?'
-end
-
-get '/admin' do
-  erb :admin
-end
-
-post '/admin' do
-  session[:identity] = params['login']
-  session[:identity] = params['password']
-    @login = params[:login]
-	@password = params[:password]
-	if @login == 'admin' && @password == "secret"
-		 	 where_user_came_from = session[:previous_url] || '/'
- 			 redirect to where_user_came_from
-	else
-		@report = '<p>Доступ запрещён! Неправильный логин или пароль.</p>'
-		erb :admin
-	end
- 
-end
-
-get '/logout' do
-  session.delete(:identity)
-  erb "<div class='alert alert-message'>Вы вышли из системы</div>"
-end
-
-get '/secure/place' do
-  erb 'This is a secret place that only <%=session[:identity]%> has access to!'
 end

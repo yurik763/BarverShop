@@ -71,8 +71,8 @@ end
 
 get '/showusers' do
   get_db
-  @results = @db.execute 'SELECT * FROM Users ORDER BY id DESC'
-  @db.close
+  @results = @db.execute 'SELECT * FROM Users ORDER BY id DESC' #выводит таблицу и записывет результат в result
+  
 
   erb :showusers  
 end

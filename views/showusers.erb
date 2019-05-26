@@ -1,4 +1,4 @@
-<table class="table">
+<table class="table table-bordered">
   <thead>
     <tr>
       <th>id</th>
@@ -9,8 +9,8 @@
       <th>Цвет</th>
     </tr>
   </thead>
-  <% @results.each do |row| %>
   <tbody>
+  <% @results.each do |row| %>
     <tr>
       <td><%= row['id'] %></td>
       <td><%= row['username'] %></td>

@@ -85,10 +85,8 @@ post '/visit' do
  db.execute 'INSERT INTO Users (username, phone, datestamp, barber, color) 
  VALUES (?, ?, ?, ?, ?)', [@username, @phone, @date_time, @barber, @color]
 
-  @title = "Спасибо!"
-  @message = "Уважаемый #{@username}, мы ждём вас #{@date_time}. Ваша парикмахер #{@barber}, цвет окраски #{@color}"
-
-  erb :message
+  erb "<h2> Спасибо, вы записались! </h2>"
+ 
 end
 
 get '/contacts' do
